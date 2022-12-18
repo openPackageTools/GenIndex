@@ -18,13 +18,15 @@ import sys
 
 
 class GenIndex:
-    def __init__(self, num=False, icon=False, folder_icon='📁', file_icon='📄', type="MD",debug=False):
+    def __init__(self, override=False,num=False, icon=False, folder_icon='📁', file_icon='📄', type="MD",debug=False):
         self.num = num
         self.icon = icon
         self.folder_icon = folder_icon
-        self.folder_icon = file_icon
+        self.file_icon = file_icon
         self.type = type
         self.debug=debug
+        self.gen_ingore=[]
+        self.override=override
         if debug:
             self.generated_files=[]
         if type=="MD":
@@ -35,10 +37,16 @@ class GenIndex:
             with open("templates/html.html","r",encoding="utf-8") as f:
                 self.html=f.read()
     def gen_index(self,path):
+        gen_ingore=os.path.join(path,"/.genignore")
+        if os.path.exists(gen_ingore):
+            with open(gen_ingore) as f:
+                self.gen_ingore.extend(f.readlines())
         if self.type=="MD":
             self.gen_md(path)
         else:
-            shutil.copy('static',path+'/static')
+            if os.path.exists(path+'/static'):
+                 shutil.rmtree(path+'/static')
+            shutil.copytree('static',path+'/static')
             self.gen_html(path)
     
     def gen_html(self,path,depth=0):
@@ -56,21 +64,35 @@ class GenIndex:
                     self.gen_html(c_path,depth+1)
 
                 else:
-                    ch_dir = c_dir.strip().replace(" ", "%20")
                     if c_dir != "index.html":
+                        extension=""
+                        parts=c_dir.split(".")
+                        if len(parts)>1:
+                            extension=parts[-1]
+                        ch_dir = c_dir.strip().replace(" ", "%20")
+                        if extension in ["java","yaml","yml","py","php"]:
+                            content_file=os.path.join(path,".genc/",parts[0]+".md")
+                            if not os.path.exists(path+"/.genc"):
+                                os.makedirs(path+"/.genc",exist_ok=True)
+                            ch_dir = content_file.strip().replace(" ", "%20")
+                            with open(content_file,"w",encoding="utf-8") as f:
+                                with open(os.path.join(path,c_dir),"r",encoding="utf-8",) as inp:
+                                    f.write(f"```{extension}\n{inp.read()}\n```")
                         value+=self.item.format(icon=f"./{'../'*depth}static/file.png",href=ch_dir,title=c_dir)
                         #value += f"{'1.' if self.num else '- '}{self.file_icon if self.icon else ''} [{c_dir}](./{ch_dir})\n"
             readme = os.path.join(path, "index.html")
             print(readme,value)
-            with open(readme, "w", encoding='utf-8') as file:
-                content=self.html.replace("{body}",value)
-                print(content)
-                if self.debug:
-                    self.generated_files.append(content)
-                else:
-                    file.write(content)
+            if self.override or  (not os.path.exists(readme)):
+                with open(readme, "w", encoding='utf-8') as file:
+                    content=self.html.replace("{body}",value)
+                    content=content.replace("{Title}",path)
+                    print(content)
+                    if self.debug:
+                        self.generated_files.append(content)
+                    else:
+                        file.write(content)
 
-                print("Written:\n", value)
+                    print("Written:\n", value)
         except Exception as e:
             print(e,e, "Missed something or tried to open list readme.md")
 
@@ -103,14 +125,24 @@ class GenIndex:
 
 if __name__ == "__main__":
     par = sys.argv[1]
-    icon = False if sys.argv[2].lower() == "false" else True
-    num = False if sys.argv[3].lower() == "false" else True
+    icon =  True
+    num = False 
     folder_icon = '📁'
     file_icon = '📄'
+    index_type="HTML"
+    over_ride=False
+    if (len(sys.argv) >= 3):
+        index_type = sys.argv[2].upper() if sys.argv[2] else "HTML"
+    if (len(sys.argv) >= 4):
+        over_ride = False if sys.argv[3].lower() == "false" else True
     if (len(sys.argv) >= 5):
-        folder_icon = sys.argv[4] if sys.argv[4] else '📁'
+        icon = False if sys.argv[4].lower() == "false" else True
     if (len(sys.argv) >= 6):
-        file_icon = sys.argv[5] if sys.argv[5] else '📄'
+        num = False if sys.argv[5].lower() == "false" else True
+    if (len(sys.argv) >= 7):
+        folder_icon = sys.argv[6] if sys.argv[6] else '📁'
+    if (len(sys.argv) >= 8):
+        file_icon = sys.argv[7] if sys.argv[7] else '📄'
     gen = GenIndex(num=num, icon=icon, folder_icon=folder_icon,
-                   file_icon=file_icon)
+                   file_icon=file_icon,type=index_type)
     gen.gen_index(par)
