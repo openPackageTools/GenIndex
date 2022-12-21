@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{Title}</title>
+    <style>
+        body{
+            padding: 0px;
+            margin: 0px;
+        }
+       .outer{
+        display: grid;
+        grid-template-columns: auto;
+        grid-template-rows: 70% 30%;
+        text-decoration: none;
+        color: black;
+        background-color: rgba(200, 200,200,.2);
+        box-shadow: 1px 1px 5px #aaaaaa;
+        border-radius: 5px;
+       }
+       .outer:hover{
+        background-color: rgba(200, 200,200,.3);
+        transform: scale(1.02);
+        transition: .2s all;
+       }
+       .outer img{
+        width: 200px;
+        height: 200px;
+        align-self: center;
+       }
+       .outer p{
+        padding: 0px 0px 10px 10px;
+        font-weight: bold;
+       }
+       #container{
+                margin:0px 300px 0px 300px;
+        }
+        #home{
+                padding:10px;
+                margin: 10px;
+                box-shadow: 2px 2px 5px #454545;
+                border-radius: 2px;
+                display: inline-block;
+                text-decoration: none;
+        }
+        #grid-con{
+            display: grid;
+            grid-template-columns: auto auto auto auto;
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+<div id="container">
+<h3> {content_title} </h3><br>
+<a href="/" id="home">Home</a>
+<div id="grid-con">
+   {body}
+</div>
+</div>
+</body>
+</html>

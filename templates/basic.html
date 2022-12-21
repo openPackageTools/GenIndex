@@ -20,16 +20,32 @@
        }
        .outer:hover{
         background-color: rgba(200, 200,200,.3);
+        transform: scale(1.01);
+        transition: .2s all;
        }
        .outer img{
         width:30px;
         height: 30px;
         align-self: center;
        }
-
+       #container{
+                margin:0px 300px 0px 300px;
+        }
+        #home{
+                padding:10px;
+                margin: 10px;
+                box-shadow: 2px 2px 5px #454545;
+                border-radius: 2px;
+                display: inline-block;
+                text-decoration: none;
+        }
     </style>
 </head>
 <body>
+<div id="container">
+<h3> {content_title} </h3><br>
+<a href="/" id="home">Home</a>
 {body}
+</div>
 </body>
 </html>
