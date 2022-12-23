@@ -35,7 +35,7 @@
         font-weight: bold;
        }
        #container{
-                margin:0px 300px 0px 300px;
+               margin:0px 10% 0px 10%;
         }
         #home{
                 padding:10px;
@@ -49,6 +49,17 @@
             display: grid;
             grid-template-columns: auto auto auto auto;
             gap: 20px;
+        }
+    
+        @media screen and (max-width:1000px) {
+           #grid-con{
+            grid-template-columns: auto auto auto;
+           }
+        }
+        @media screen and (max-width:800px) {
+            #grid-con{
+            grid-template-columns: auto auto;
+           }
         }
     </style>
 </head>
