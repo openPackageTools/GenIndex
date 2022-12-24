@@ -18,7 +18,7 @@ import sys
 
 class GenIndex:
     """Class to handle all configuration and to generate The index files
-    
+
      ...
 
      Attributes
@@ -53,7 +53,7 @@ class GenIndex:
                 Text or emojis to be shown before each item list whose type is a file.
             file_icon : str     
                 Text or emojis to be shown before each item list whose type is a folder.
-    
+
 
      Methods
      -------
@@ -72,65 +72,125 @@ class GenIndex:
           Write generated code for HTML index pages to HTML files.
      check_presence(self,file) -> 
           check for presence of a file in excluded files and folders.
-     
+
 
     """
-    def __init__(self, override=False,item_type="LIST",num=False, icon=False, folder_icon='📁', file_icon='📄', type="HTML",debug=False):
-        """Set up all configuration parameter"""
+
+    def __init__(self, override=False, item_type="LIST", num=False, icon=False, folder_icon='📁', file_icon='📄', type="HTML", debug=False):
+        """Set up all configuration parameter
+
+         Parameters
+         ----
+        Common:
+            type : str
+                Type of the index file to be generated. This can be HTML and MD(Markdown).Default is HTML.
+            override : bool
+                Whether to override or not an existing index file of specified type
+            debug : bool
+                Flag to run code in debug mode. In Debug mode add content to be written in index files in genarated_files list.
+                Which can be observed to get inside.
+
+        Type specific attrs:
+            HTML attrs:
+                item_type : str
+                    Specifies the type of item used for each dir or file when type is HTML. It can be LIST or CARD. Default value is LIST.
+
+            MD attrs:
+                num : bool
+                    Flag to tell wether to show a numeric list for item list.
+                icon : bool
+                    Flag to tell wether to show icon. Icon are some text or emojis shown in the start of item.
+                folder_icon : str
+                    Text or emojis to be shown before each item list whose type is a file.
+                file_icon : str     
+                    Text or emojis to be shown before each item list whose type is a folder.
+
+
+
+        """
         self.num = num
         self.icon = icon
         self.folder_icon = folder_icon
         self.file_icon = file_icon
         self.type = type
-        self.item_type=item_type
-        self.debug=debug
-        self.gen_ingore=[]
-        self.override=override
+        self.item_type = item_type
+        self.debug = debug
+        self.gen_ingore = []
+        self.override = override
         if debug:
-            self.generated_files=[]
-        if type=="MD":
+            self.generated_files = []
+        if type == "MD":
             pass
         else:
-            with open("templates/item","r",encoding="utf-8") as f:
-                self.item=f.read()
-            if self.item_type=="LIST":
-                with open("templates/basic.html","r",encoding="utf-8") as f:
-                    self.html=f.read()
+            with open("templates/item", "r", encoding="utf-8") as f:
+                self.item = f.read()
+            if self.item_type == "LIST":
+                with open("templates/basic.html", "r", encoding="utf-8") as f:
+                    self.html = f.read()
                     print("Using list layout...")
-            elif self.item_type=="CARD":
-                with open("templates/card.html","r",encoding="utf-8") as f:
-                    self.html=f.read()
+            elif self.item_type == "CARD":
+                with open("templates/card.html", "r", encoding="utf-8") as f:
+                    self.html = f.read()
                     print("Using card layout...")
             else:
                 print("Invalid item type")
 
-    def gen_index(self,path):
-        self.parent_dir=path
-        self.add_ignored_item(os.path.join(path,"/.genignore"))
-        self.add_ignored_item(os.path.join(path,"/.gitignore"))
+    def gen_index(self, path):
+        """
+        Configures repo or site directory for resources
+
+        """
+        self.parent_dir = path
+        self.add_ignored_item(os.path.join(path, "/.genignore"))
+        self.add_ignored_item(os.path.join(path, "/.gitignore"))
         self.gen_ingore.append("genc")
-        if self.type=="MD":
+        if self.type == "MD":
             self.gen_md(path)
         else:
             if os.path.exists(path+'/static'):
-                 shutil.rmtree(path+'/static')
-            shutil.copytree('static',path+'/static')
+                shutil.rmtree(path+'/static')
+            shutil.copytree('static', path+'/static')
             self.gen_html(path)
-    
-    def add_ignored_item(self,file):
+
+    def add_ignored_item(self, file):
+        """
+        Add ignore files to excluded list.
+
+        This method goes throught the list of files in provided file to add them in excluded list.
+        
+        """
         if os.path.exists(file):
             with open(file) as f:
                 self.gen_ingore.extend(f.readlines())
 
-    def check_presence(self,file):
+    def check_presence(self, file):
+        """
+        Checks if a file is excluded or not
+
+        Parameter
+        ---------
+        file -> str
+            file to be checked for presence
+        """
         import re
         for item in self.gen_ingore:
-            i=item.split("/")[-1]
-            if re.match(i,file):
+            i = item.split("/")[-1]
+            if re.match(i, file):
                 return True
         return False
-    
-    def gen_html(self,path,depth=0):
+
+    def gen_html(self, path, depth=0):
+        """ Generates html index pages
+
+        Recursively goes throught all directory and add index file in them.
+
+        Parameters:
+        path -> str
+            path of current directory
+        depth -> str
+            Depth is used to measure depth of current directory from root directory. It help to build path to refer to static
+            resources added to repo or site root directory. 
+        """
         dirs = os.listdir(path)
         try:
             value = ""
@@ -141,36 +201,49 @@ class GenIndex:
                 c_path = os.path.join(path, c_dir)
                 if not os.path.isfile(c_path):
                     ch_dir = c_dir.strip().replace(" ", "%20")
-                    value+=self.item.format(icon=f"./{'../'*depth}static/folder.png",href=ch_dir,title=c_dir)
+                    value += self.item.format(
+                        icon=f"./{'../'*depth}static/folder.png", href=ch_dir, title=c_dir)
                     #value += f"{'1.' if self.num else '- '}{self.folder_icon if self.icon else ''} [{c_dir}](./{ch_dir})\n"
-                    self.gen_html(c_path,depth+1)
+                    self.gen_html(c_path, depth+1)
 
                 else:
                     if c_dir != "index.html":
-                        extension=""
-                        parts=c_dir.split(".")
-                        if len(parts)>1:
-                            extension=parts[-1]
+                        extension = ""
+                        parts = c_dir.split(".")
+                        if len(parts) > 1:
+                            extension = parts[-1]
                         ch_dir = c_dir.strip().replace(" ", "%20")
-                        if extension in ["java","yaml","yml","py","php"]:
-                            content_file=os.path.join("genc",parts[0]+".md")
-                            content_path=os.path.join(path,content_file)
-                            genc_path=os.path.join(path,"genc")
+                        if extension in ["java", "yaml", "yml", "py", "php"]:
+                            content_file = os.path.join("genc", parts[0]+".md")
+                            content_path = os.path.join(path, content_file)
+                            genc_path = os.path.join(path, "genc")
                             if not os.path.exists(genc_path):
-                                os.makedirs(genc_path,exist_ok=True)
-                            ch_dir = os.path.join("genc",parts[0]).strip().replace(" ", "%20")
-                            with open(content_path,"w",encoding="utf-8") as f:
-                                with open(os.path.join(path,c_dir),"r",encoding="utf-8",) as inp:
-                                    file_content=inp.read()
-                                    f.write(f"```{extension}\n{file_content}\n```")
-                        value+=self.item.format(icon=f"./{'../'*depth}static/file.png",href=ch_dir,title=c_dir)
+                                os.makedirs(genc_path, exist_ok=True)
+                            ch_dir = os.path.join(
+                                "genc", parts[0]).strip().replace(" ", "%20")
+                            with open(content_path, "w", encoding="utf-8") as f:
+                                with open(os.path.join(path, c_dir), "r", encoding="utf-8",) as inp:
+                                    file_content = inp.read()
+                                    f.write(
+                                        f"```{extension}\n{file_content}\n```")
+                        value += self.item.format(
+                            icon=f"./{'../'*depth}static/file.png", href=ch_dir, title=c_dir)
                         #value += f"{'1.' if self.num else '- '}{self.file_icon if self.icon else ''} [{c_dir}](./{ch_dir})\n"
             readme = os.path.join(path, "index.html")
-            self.write_to_html_file(path,readme,value)
+            self.write_to_html_file(path, readme, value)
         except Exception as e:
-            print(e,e, "Missed something or tried to open list readme.md")
+            print(e, e, "Missed something or tried to open list readme.md")
 
     def gen_md(self, path):
+        """Generates Markdown index pages
+
+        Recursively goes throught all directory and add readme file in them.
+
+        Parameters:
+        path -> str
+            path of current directory
+        
+        """
         dirs = os.listdir(path)
         try:
             value = "## Tables of content\n"
@@ -189,47 +262,73 @@ class GenIndex:
                         value += f"{'1.' if self.num else '- '}{self.file_icon if self.icon else ''} [{c_dir}](./{ch_dir})\n"
             readme = os.path.join(path, "readme.md")
             print(readme)
-            self.write_to_md_file(path,readme,value)
-            
+            self.write_to_md_file(path, readme, value)
+
         except Exception as e:
             print(e, "Missed something or tried to open list readme.md")
             traceback.print_exc()
 
-    def write_to_md_file(self,path,file,value):
-        if self.override or  (not os.path.exists(file)):
+    def write_to_md_file(self, path, file, value):
+        """
+        Write index content to a index file
+    
+        Parameter
+        --------
+        path -> str
+            path of file
+        file -> str
+            file to which the content to be written
+        value -> str
+            value to be written in file
+        """
+
+        if self.override or (not os.path.exists(file)):
             with open(file, "w", encoding='utf-8') as f:
                 f.write(value)
                 print("Written:\n", value)
 
-    def write_to_html_file(self,path,file,value):
-        if self.override or  (not os.path.exists(file)):
-                with open(file, "w", encoding='utf-8') as f:
-                    content=self.html.replace("{body}",value)
-                    content=content.replace("{Title}",path.replace(self.parent_dir,""))
-                    content=content.replace("{content_title}","Table of content")
-                    if self.debug:
-                        self.generated_files.append(content)
-                    else:
-                        f.write(content)
-                        f.close()
-                        print("Generated:",path,file)
+    def write_to_html_file(self, path, file, value):
+        """
+        Write index content to a index file
+    
+        Parameter
+        --------
+        path -> str
+            path of file
+        file -> str
+            file to which the content to be written
+        value -> str
+            value to be written in file
+        """
+        if self.override or (not os.path.exists(file)):
+            with open(file, "w", encoding='utf-8') as f:
+                content = self.html.replace("{body}", value)
+                content = content.replace(
+                    "{Title}", path.replace(self.parent_dir, ""))
+                content = content.replace(
+                    "{content_title}", "Table of content")
+                if self.debug:
+                    self.generated_files.append(content)
+                else:
+                    f.write(content)
+                    f.close()
+                    print("Generated:", path, file)
 
-
-
+# Driver code for module
 if __name__ == "__main__":
     par = sys.argv[1]
-    icon =  True
-    num = False 
+    icon = True
+    num = False
     folder_icon = '📁'
     file_icon = '📄'
-    index_type="HTML"
-    item_type="LIST"
-    over_ride=False
+    index_type = "HTML"
+    item_type = "LIST"
+    over_ride = False
     if (len(sys.argv) >= 3):
         over_ride = False if sys.argv[2].upper() == "FALSE" else True
     if (len(sys.argv) >= 4):
         index_type = sys.argv[3].upper() if sys.argv[3] else "HTML"
-    if index_type=="MD":
+    if index_type == "MD":
         if (len(sys.argv) >= 5):
             icon = False if sys.argv[4].upper() == "FALSE" else True
         if (len(sys.argv) >= 6):
@@ -238,7 +337,7 @@ if __name__ == "__main__":
             folder_icon = sys.argv[6] if sys.argv[6] else '📁'
         if (len(sys.argv) >= 8):
             file_icon = sys.argv[7] if sys.argv[7] else '📄'
-    elif index_type=="HTML":
+    elif index_type == "HTML":
         if (len(sys.argv) >= 5):
             item_type = sys.argv[4].upper()
             print(item_type)
@@ -247,8 +346,8 @@ if __name__ == "__main__":
         exit()
     if over_ride:
         print("Warning: It will make destructive changes,Do you want to continue(Y/N) ?")
-        if input().lower()=="n":
-            exit() 
+        if input().lower() == "n":
+            exit()
     gen = GenIndex(num=num, icon=icon, folder_icon=folder_icon,
-                   file_icon=file_icon,type=index_type,override=over_ride,item_type=item_type)
+                   file_icon=file_icon, type=index_type, override=over_ride, item_type=item_type)
     gen.gen_index(par)
