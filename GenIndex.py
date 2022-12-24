@@ -1,12 +1,11 @@
 """
-This module generates indices for github pages. Github repo which false in category of code base more than a static site and
+ This module generates indices for github pages. Github repo which false in category of code base more than a static site and
  we try to deploy such files to github pages then for nested folder either we have to create a index.html or a readme to access these code
  bases. This Module help this this particular case.
 
-Customizations:
-  1. Page type - page type can be set to html or github markdown 
-  2. List type - 
-  3. Icon -
+Classes:
+
+   - GenIndex - Configures and generates the index pages.
   
  
 """
@@ -18,8 +17,66 @@ import sys
 
 
 class GenIndex:
-    """This class handle all configuration of GenIndex object and methods to generate The index files according to use need"""
-    def __init__(self, override=False,item_type="LIST",num=False, icon=False, folder_icon='📁', file_icon='📄', type="MD",debug=False):
+    """Class to handle all configuration and to generate The index files
+    
+     ...
+
+     Attributes
+     ----------
+     Common:
+        parent_dir : str
+            path to the parent directory of site or repo 
+        type : str
+            Type of the index file to be generated. This can be HTML and MD(Markdown).Default is HTML.
+        override : bool
+            Whether to override or not an existing index file of specified type
+        debug : bool
+            Flag to run code in debug mode. In Debug mode add content to be written in index files in genarated_files list.
+            Which can be observed to get inside.
+        genarated_files : list
+            contains content to be written to file in debug mode.
+        gen_ignore : list
+            contains list of files to be excluded in generated index pages. It also consider .gitignore and .geignore to
+            it's content.
+
+     Type specific attrs:
+        HTML attrs:
+            item_type : str
+                Specifies the type of item used for each dir or file when type is HTML. It can be LIST or CARD. Default value is LIST.
+
+        MD attrs:
+            num : bool
+                Flag to tell wether to show a numeric list for item list.
+            icon : bool
+                Flag to tell wether to show icon. Icon are some text or emojis shown in the start of item.
+            folder_icon : str
+                Text or emojis to be shown before each item list whose type is a file.
+            file_icon : str     
+                Text or emojis to be shown before each item list whose type is a folder.
+    
+
+     Methods
+     -------
+     gen_index(path) -> None
+         Configures the gen_ignore files from root of repo or site. Coppies resource to repo and calls subsequent method according
+         to type of index.
+     add_ignored_item(file) -> None
+         Adds item to gen_ignore list from specified file.
+     gen_html(path,depth=0) -> None
+         Generates HTML index pages.
+     gen_md(path) -> None
+         Generates MD index pages.
+     write_to_md_file(path,file,value) -> None
+          Write generated code for md index pages to md files.
+     write_to_html_file(path,file,value):
+          Write generated code for HTML index pages to HTML files.
+     check_presence(self,file) -> 
+          check for presence of a file in excluded files and folders.
+     
+
+    """
+    def __init__(self, override=False,item_type="LIST",num=False, icon=False, folder_icon='📁', file_icon='📄', type="HTML",debug=False):
+        """Set up all configuration parameter"""
         self.num = num
         self.icon = icon
         self.folder_icon = folder_icon
