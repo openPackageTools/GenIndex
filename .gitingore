@@ -1,5 +1,5 @@
 Test.*
 __pycache__
 .vscode
-cardcheck
-Cardcheck.html
+templates/cardcheck
+templates/Cardcheck.html
