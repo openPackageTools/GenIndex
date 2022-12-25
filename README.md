@@ -22,8 +22,8 @@ Generates static index file for Github-Pages - Generate Index file for your code
  ## How to use 
   
   GenIndex can be by to ways:
-  - As a python module by importing to your program. Check 👉 [here](./Get-started/AS-module.md)
-  - As script By running directly from Terminal. Check 👉 [here](./Get-started/AS-script.md)
+  - As a python module by importing to your program. Check 👉 [here](./Get-started/As-module.md)
+  - As script By running directly from Terminal. Check 👉 [here](./blob/main/Get-started/AS-script.md)
   
   
 
