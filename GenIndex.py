@@ -76,7 +76,9 @@ class GenIndex:
 
     """
 
-    def __init__(self, override=False, item_type="LIST", num=False, icon=False, folder_icon='📁', file_icon='📄', type="HTML", debug=False):
+    def __init__(self, override=False, item_type="LIST", num=False, icon=False, folder_icon='📁', 
+           file_icon='📄', type="HTML", debug=False,item_template="templates/item", page_template="templates/basic.html"
+    ):
         """Set up all configuration parameter
 
          Parameters
@@ -113,6 +115,8 @@ class GenIndex:
         self.folder_icon = folder_icon
         self.file_icon = file_icon
         self.type = type
+        self.item_template = item_template
+        self.page_template = page_template
         self.item_type = item_type
         self.debug = debug
         self.gen_ingore = []
@@ -122,18 +126,14 @@ class GenIndex:
         if type == "MD":
             pass
         else:
-            with open("templates/item", "r", encoding="utf-8") as f:
+            with open(self.item_template, "r", encoding="utf-8") as f:
                 self.item = f.read()
-            if self.item_type == "LIST":
-                with open("templates/basic.html", "r", encoding="utf-8") as f:
+            if self.item_type == "CARD":
+                self.page_template = "templates/card.html"
+            with open(self.page_template, "r", encoding="utf-8") as f:
                     self.html = f.read()
-                    print("Using list layout...")
-            elif self.item_type == "CARD":
-                with open("templates/card.html", "r", encoding="utf-8") as f:
-                    self.html = f.read()
-                    print("Using card layout...")
-            else:
-                print("Invalid item type")
+            print("Using",self.item_template,"as Item template...")
+            print("Using",self.page_template,"as page template...")
 
     def gen_index(self, path):
         """
@@ -144,12 +144,13 @@ class GenIndex:
         self.add_ignored_item(os.path.join(path, "/.genignore"))
         self.add_ignored_item(os.path.join(path, "/.gitignore"))
         self.gen_ingore.append("genc")
+        self.gen_ingore.append("genstatic")
         if self.type == "MD":
             self.gen_md(path)
         else:
-            if os.path.exists(path+'/static'):
-                shutil.rmtree(path+'/static')
-            shutil.copytree('static', path+'/static')
+            if os.path.exists(path+'/genstatic'):
+                shutil.rmtree(path+'/genstatic')
+            shutil.copytree('genstatic', path+'/genstatic')
             self.gen_html(path)
 
     def add_ignored_item(self, file):
@@ -202,7 +203,7 @@ class GenIndex:
                 if not os.path.isfile(c_path):
                     ch_dir = c_dir.strip().replace(" ", "%20")
                     value += self.item.format(
-                        icon=f"./{'../'*depth}static/folder.png", href=ch_dir, title=c_dir)
+                        icon=f"./{'../'*depth}genstatic/folder.png", href=ch_dir, title=c_dir)
                     #value += f"{'1.' if self.num else '- '}{self.folder_icon if self.icon else ''} [{c_dir}](./{ch_dir})\n"
                     self.gen_html(c_path, depth+1)
 
@@ -227,7 +228,7 @@ class GenIndex:
                                     f.write(
                                         f"```{extension}\n{file_content}\n```")
                         value += self.item.format(
-                            icon=f"./{'../'*depth}static/file.png", href=ch_dir, title=c_dir)
+                            icon=f"./{'../'*depth}genstatic/file.png", href=ch_dir, title=c_dir)
                         #value += f"{'1.' if self.num else '- '}{self.file_icon if self.icon else ''} [{c_dir}](./{ch_dir})\n"
             readme = os.path.join(path, "index.html")
             self.write_to_html_file(path, readme, value)
@@ -324,6 +325,8 @@ if __name__ == "__main__":
     index_type = "HTML"
     item_type = "LIST"
     over_ride = False
+    item_template="templates/item"
+    page_template="templates/basic.html"
     if (len(sys.argv) >= 3):
         over_ride = False if sys.argv[2].upper() == "FALSE" else True
     if (len(sys.argv) >= 4):
@@ -341,6 +344,11 @@ if __name__ == "__main__":
         if (len(sys.argv) >= 5):
             item_type = sys.argv[4].upper()
             print(item_type)
+        if item_type == "CUSTOM":
+            if (len(sys.argv) >= 6):
+                item_template = sys.argv[5]
+            if (len(sys.argv) >= 7):
+                page_template = sys.argv[6]
     else:
         print("Ivalid index type")
         exit()
@@ -349,5 +357,6 @@ if __name__ == "__main__":
         if input().lower() == "n":
             exit()
     gen = GenIndex(num=num, icon=icon, folder_icon=folder_icon,
-                   file_icon=file_icon, type=index_type, override=over_ride, item_type=item_type)
+                   file_icon=file_icon, type=index_type, override=over_ride, item_type=item_type,
+                   item_template=item_template,page_template=page_template)
     gen.gen_index(par)
