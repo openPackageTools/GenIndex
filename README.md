@@ -22,8 +22,26 @@ Generates static index file for Github-Pages - Generate Index file for your code
  ## How to use 
   
   GenIndex can be used by to ways:
-  - As a python module by importing to your program. Check 👉 [here](./Get-started/As-module.md)
-  - As script By running directly from Terminal. Check 👉 [here](./blob/main/Get-started/AS-script.md)
+  - As a python module by importing to your program. Check [👉 here](./Get-started/As-module.md)
+  - As script By running directly from Terminal. Check [👉 here](./blob/main/Get-started/AS-script.md)
+
+## What's Next
+ - Learn how to get started with GenIndex [👉 here](./Get-started/get-started.md)
+ - Learn various options available [⚙ here](./Get-started/detailed-overview.md)
+ 
+## Contributions
+  
+  Contributions ❤ to this repo are fully welcomed. Contributions can be done in the form of:
+  - Page or item templates
+  - Improvement in GenIndex Working. Make it more flexible to accomodate changes.
+  - Suggestions for improvements
+  - If you find this helpful star repo and share with friends
+  
+## Need Help
+ 
+ - Mail 💌 at newsandeepat@gmail.com
+ - Open an issue 🐛
+  
   
   
 
