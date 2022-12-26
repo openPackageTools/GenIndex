@@ -34,4 +34,4 @@ avoid acidental deletion of you site😬
 
 ## What's next
 
-- Read detailed overview of available options.
+- Read detailed overview of available options [here](./detailed-overview.md)
