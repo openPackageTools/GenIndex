@@ -13,7 +13,7 @@ Generates static index file for Github-Pages - Generate Index file for your code
  ## Features
  
  - Can generate index files in HTML format or Markdown format
- - Markdown can be customized with available optuons such as type of list 📃 to be shown.
+ - Markdown can be customized with available options such as type of list 📃 to be shown.
  - HTML indeces can be fully customized from using prebuild options to using custom template to give look and feel of your 🌐 website
  - Easy to use 
  - Generate pages can be added to existing site
@@ -21,7 +21,7 @@ Generates static index file for Github-Pages - Generate Index file for your code
  
  ## How to use 
   
-  GenIndex can be by to ways:
+  GenIndex can be used by to ways:
   - As a python module by importing to your program. Check 👉 [here](./Get-started/As-module.md)
   - As script By running directly from Terminal. Check 👉 [here](./blob/main/Get-started/AS-script.md)
   
