@@ -214,7 +214,7 @@ class GenIndex:
                         if len(parts) > 1:
                             extension = parts[-1]
                         ch_dir = c_dir.strip().replace(" ", "%20")
-                        if extension in ["java", "yaml", "yml", "py", "php"]:
+                        if extension in ["java", "yaml", "yml", "py", "php","sh","html","css","js"]:
                             content_file = os.path.join("genc", parts[0]+".md")
                             content_path = os.path.join(path, content_file)
                             genc_path = os.path.join(path, "genc")
@@ -227,11 +227,13 @@ class GenIndex:
                                     file_content = inp.read()
                                     f.write(
                                         f"```{extension}\n{file_content}\n```")
+                        if extension =="md":
+                            ch_dir=parts[0].strip().replace(" ", "%20")
                         value += self.item.format(
                             icon=f"./{'../'*depth}genstatic/file.png", href=ch_dir, title=c_dir)
                         #value += f"{'1.' if self.num else '- '}{self.file_icon if self.icon else ''} [{c_dir}](./{ch_dir})\n"
             readme = os.path.join(path, "index.html")
-            self.write_to_html_file(path, readme, value)
+            self.write_to_html_file(path, readme, value, depth)
         except Exception as e:
             print(e, e, "Missed something or tried to open list readme.md")
 
@@ -288,7 +290,7 @@ class GenIndex:
                 f.write(value)
                 print("Written:\n", value)
 
-    def write_to_html_file(self, path, file, value):
+    def write_to_html_file(self, path, file, value, depth):
         """
         Write index content to a index file
     
@@ -308,6 +310,8 @@ class GenIndex:
                     "{Title}", path.replace(self.parent_dir, ""))
                 content = content.replace(
                     "{content_title}", "Table of content")
+                content = content.replace(
+                    "{root}", "../"*depth)
                 if self.debug:
                     self.generated_files.append(content)
                 else:
