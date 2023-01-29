@@ -77,7 +77,7 @@ class GenIndex:
     """
 
     def __init__(self, override=False, item_type="LIST", num=False, icon=False, folder_icon='📁', 
-           file_icon='📄', type="HTML", debug=False,item_template="templates/item", page_template="templates/basic.html"
+           file_icon='📄', type="HTML", output_file='index.html', debug=False,item_template="templates/item", page_template="templates/basic.html"
     ):
         """Set up all configuration parameter
 
@@ -91,6 +91,8 @@ class GenIndex:
             debug : bool
                 Flag to run code in debug mode. In Debug mode add content to be written in index files in genarated_files list.
                 Which can be observed to get inside.
+            output_file: str
+                Name for the output file. This name is used for the file to be generated.
 
         Type specific attrs:
             HTML attrs:
@@ -123,6 +125,8 @@ class GenIndex:
         self.override = override
         if debug:
             self.generated_files = []
+        self.output_file=output_file
+        print(output_file)
         if type == "MD":
             pass
         else:
@@ -143,6 +147,7 @@ class GenIndex:
         self.parent_dir = path
         self.add_ignored_item(os.path.join(path, "/.genignore"))
         self.add_ignored_item(os.path.join(path, "/.gitignore"))
+        self.add_ignored_item("./.gitignore")
         self.gen_ingore.append("genc")
         self.gen_ingore.append("genstatic")
         if self.type == "MD":
@@ -193,10 +198,10 @@ class GenIndex:
             resources added to repo or site root directory. 
         """
         dirs = os.listdir(path)
-        try:
-            value = ""
-            c_dirs = os.listdir(os.path.join(path))
-            for c_dir in c_dirs:
+        value = ""
+        c_dirs = os.listdir(os.path.join(path))
+        for c_dir in c_dirs:
+            try:
                 if self.check_presence(c_dir):
                     continue
                 c_path = os.path.join(path, c_dir)
@@ -208,7 +213,7 @@ class GenIndex:
                     self.gen_html(c_path, depth+1)
 
                 else:
-                    if c_dir != "index.html":
+                    if c_dir != self.output_file:
                         extension = ""
                         parts = c_dir.split(".")
                         if len(parts) > 1:
@@ -232,10 +237,11 @@ class GenIndex:
                         value += self.item.format(
                             icon=f"./{'../'*depth}genstatic/file.png", href=ch_dir, title=c_dir)
                         #value += f"{'1.' if self.num else '- '}{self.file_icon if self.icon else ''} [{c_dir}](./{ch_dir})\n"
-            readme = os.path.join(path, "index.html")
-            self.write_to_html_file(path, readme, value, depth)
-        except Exception as e:
-            print(e, e, "Missed something or tried to open list readme.md")
+            except Exception as e:
+                print(e, e, "Line:240 - Missed something or tried to open list readme.md")
+        readme = os.path.join(path, self.output_file)
+        self.write_to_html_file(path, readme, value, depth)
+        
 
     def gen_md(self, path):
         """Generates Markdown index pages
@@ -261,14 +267,14 @@ class GenIndex:
 
                 else:
                     ch_dir = c_dir.strip().replace(" ", "%20")
-                    if c_dir != "readme.md":
+                    if c_dir != self.output_file:
                         value += f"{'1.' if self.num else '- '}{self.file_icon if self.icon else ''} [{c_dir}](./{ch_dir})\n"
-            readme = os.path.join(path, "readme.md")
+            readme = os.path.join(path, self.output_file)
             print(readme)
             self.write_to_md_file(path, readme, value)
 
         except Exception as e:
-            print(e, "Missed something or tried to open list readme.md")
+            print(e, "Line:273 - Missed something or tried to open list readme.md")
             traceback.print_exc()
 
     def write_to_md_file(self, path, file, value):
@@ -331,6 +337,7 @@ if __name__ == "__main__":
     over_ride = False
     item_template="templates/item"
     page_template="templates/basic.html"
+    output_file=""
     if (len(sys.argv) >= 3):
         over_ride = False if sys.argv[2].upper() == "FALSE" else True
     if (len(sys.argv) >= 4):
@@ -344,6 +351,8 @@ if __name__ == "__main__":
             folder_icon = sys.argv[6] if sys.argv[6] else '📁'
         if (len(sys.argv) >= 8):
             file_icon = sys.argv[7] if sys.argv[7] else '📄'
+        if (len(sys.argv) >= 9):
+            output_file = sys.argv[8] if sys.argv[7] else 'README.md'
     elif index_type == "HTML":
         if (len(sys.argv) >= 5):
             item_type = sys.argv[4].upper()
