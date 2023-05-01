@@ -98,7 +98,11 @@ class GenIndex:
             HTML attrs:
                 item_type : str
                     Specifies the type of item used for each dir or file when type is HTML. It can be LIST or CARD. Default value is LIST.
-
+                item_template : str
+                    If you want to use custom item then this argument specifies the file path of code for that item. which is mainly in Html.
+                page_template : str
+                    This psecifies the page template to which items are going to be added. i.e A page with header and footer for site and space 
+                    place for elements to be placed.
             MD attrs:
                 num : bool
                     Flag to tell wether to show a numeric list for item list.
@@ -125,10 +129,8 @@ class GenIndex:
         self.override = override
         if debug:
             self.generated_files = []
-        self.output_file=output_file
-        print(output_file)
         if type == "MD":
-            pass
+            self.output_file="Readme"
         else:
             with open(self.item_template, "r", encoding="utf-8") as f:
                 self.item = f.read()
@@ -138,6 +140,7 @@ class GenIndex:
                     self.html = f.read()
             print("Using",self.item_template,"as Item template...")
             print("Using",self.page_template,"as page template...")
+        self.output_file=output_file
 
     def gen_index(self, path):
         """
@@ -259,6 +262,8 @@ class GenIndex:
             c_dirs = os.listdir(os.path.join(path))
             print(c_dirs)
             for c_dir in c_dirs:
+                if self.check_presence(c_dir):
+                    continue
                 c_path = os.path.join(path, c_dir)
                 if not os.path.isfile(c_path):
                     ch_dir = c_dir.strip().replace(" ", "%20")
@@ -293,7 +298,10 @@ class GenIndex:
 
         if self.override or (not os.path.exists(file)):
             with open(file, "w", encoding='utf-8') as f:
-                f.write(value)
+                if self.debug:
+                    self.generated_files.append(value)
+                else:
+                    f.write(value)
                 print("Written:\n", value)
 
     def write_to_html_file(self, path, file, value, depth):
@@ -343,6 +351,7 @@ if __name__ == "__main__":
     if (len(sys.argv) >= 4):
         index_type = sys.argv[3].upper() if sys.argv[3] else "HTML"
     if index_type == "MD":
+        output_file='README.md'
         if (len(sys.argv) >= 5):
             icon = False if sys.argv[4].upper() == "FALSE" else True
         if (len(sys.argv) >= 6):
@@ -352,8 +361,9 @@ if __name__ == "__main__":
         if (len(sys.argv) >= 8):
             file_icon = sys.argv[7] if sys.argv[7] else '📄'
         if (len(sys.argv) >= 9):
-            output_file = sys.argv[8] if sys.argv[7] else 'README.md'
+            output_file = sys.argv[8] if sys.argv[8] else 'README.md'
     elif index_type == "HTML":
+        output_file='index.html'
         if (len(sys.argv) >= 5):
             item_type = sys.argv[4].upper()
             print(item_type)
@@ -362,14 +372,23 @@ if __name__ == "__main__":
                 item_template = sys.argv[5]
             if (len(sys.argv) >= 7):
                 page_template = sys.argv[6]
+            if (len(sys.argv) >= 8):
+              output_file = sys.argv[7] if sys.argv[7] else 'index.html'
     else:
-        print("Ivalid index type")
+        print("Invalid index type")
         exit()
     if over_ride:
         print("Warning: It will make destructive changes,Do you want to continue(Y/N) ?")
         if input().lower() == "n":
             exit()
-    gen = GenIndex(num=num, icon=icon, folder_icon=folder_icon,
-                   file_icon=file_icon, type=index_type, override=over_ride, item_type=item_type,
-                   item_template=item_template,page_template=page_template)
+    gen = GenIndex(num=num, 
+                   icon=icon, 
+                   folder_icon=folder_icon,
+                   file_icon=file_icon, 
+                   type=index_type, 
+                   override=over_ride,
+                   item_type=item_type,
+                   item_template=item_template,
+                   page_template=page_template,
+                   output_file=output_file)
     gen.gen_index(par)
